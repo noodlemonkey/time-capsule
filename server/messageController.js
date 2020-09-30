@@ -1,12 +1,22 @@
 const db = require('./dbConnect.js');
+const nodemailer = require('nodemailer');
+
+const transport = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'njkousholt@gmail.com',
+    pass: '',
+  },
+});
+
 const messageController = {};
 
 messageController.storeMessage = (req, res, next) => {
   const { hours, minutes, seconds } = req.body.buriedTime;
-  const values = [req.body.message];
+  const values = [req.body.message, req.body.address];
   db.query(
-    `INSERT INTO messages(messagetxt, send_on) 
-    VALUES ($1, NOW() + interval '${hours} hour ${minutes} minute ${seconds} second');`,
+    `INSERT INTO messages(messagetxt, email, send_on) 
+    VALUES ($1, $2, NOW() + interval '${hours} hour ${minutes} minute ${seconds} second');`,
     values,
     (err, result) => {
       if (err) return next(err);
@@ -20,12 +30,27 @@ messageController.storeMessage = (req, res, next) => {
 messageController.sendMessage = async (req, res, next) => {
   const values = [];
   await db.query(
-    'SELECT id, messagetxt FROM messages WHERE send_on < NOW()',
+    'SELECT id, messagetxt, email FROM messages WHERE send_on < NOW()',
     (err, result) => {
       if (err) return next(err);
       if (result.rows.length === 0) return next();
       values[0] = result.rows[0].id;
-      res.locals.message = result.rows[0].messagetxt;
+      const message = result.rows[0].messagetxt;
+      const address = result.rows[0].email;
+      res.locals.message = message;
+
+      const mailOptions = {
+        from: 'njkousholt@gmail.com',
+        to: address,
+        subject: 'Your Time Capsule Has Been Released',
+        text: message,
+      };
+
+      transport.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return console.log('error in sendMail', error);
+        }
+      });
     }
   );
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import MessageInput from './MessageInput.js';
 import TimeInput from './TimeInput.js';
+import AddressInput from './AddressInput.js';
 
 class App extends React.Component {
   constructor() {
@@ -8,12 +9,14 @@ class App extends React.Component {
     this.state = {
       message: '',
       buriedTime: { hours: 0, minutes: 0, seconds: 0 },
+      address: '',
     };
     this.handleMessage = this.handleMessage.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.handleSecond = this.handleSecond.bind(this);
     this.handleMinute = this.handleMinute.bind(this);
     this.handleHour = this.handleHour.bind(this);
+    this.handleAddress = this.handleAddress.bind(this);
   }
 
   handleMessage(event) {
@@ -67,7 +70,16 @@ class App extends React.Component {
       body: JSON.stringify({
         message: this.state.message,
         buriedTime: this.state.buriedTime,
+        address: this.state.address,
       }),
+    });
+  }
+
+  handleAddress(event) {
+    const address = event.target.value;
+    this.setState({
+      ...this.state,
+      address,
     });
   }
 
@@ -80,7 +92,7 @@ class App extends React.Component {
           alert(message);
         })
         .catch((err) => {});
-    }, 5000);
+    }, 1000);
   }
 
   render() {
@@ -92,6 +104,8 @@ class App extends React.Component {
           message={this.state.message}
           handleMessage={this.handleMessage}
         />
+        <br />
+        <AddressInput handleAddress={this.handleAddress} />
         <br />
         <TimeInput
           handleSecond={this.handleSecond}
