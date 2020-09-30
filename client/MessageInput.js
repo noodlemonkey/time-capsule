@@ -1,6 +1,6 @@
 import React from 'react';
 
-const MessageArea = (props) => {
+const MessageInput = (props) => {
   return (
     <textarea
       name="message"
@@ -11,4 +11,4 @@ const MessageArea = (props) => {
   );
 };
 
-export default MessageArea;
+export default MessageInput;

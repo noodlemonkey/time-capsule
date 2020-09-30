@@ -1,14 +1,19 @@
 import React from 'react';
+import MessageInput from './MessageInput.js';
+import TimeInput from './TimeInput.js';
 
 class App extends React.Component {
   constructor() {
     super();
     this.state = {
       message: '',
-      buriedTime: 'test',
+      buriedTime: { hours: 0, minutes: 0, seconds: 0 },
     };
     this.handleMessage = this.handleMessage.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
+    this.handleSecond = this.handleSecond.bind(this);
+    this.handleMinute = this.handleMinute.bind(this);
+    this.handleHour = this.handleHour.bind(this);
   }
 
   handleMessage(event) {
@@ -16,6 +21,39 @@ class App extends React.Component {
     this.setState({
       ...this.state,
       message,
+    });
+  }
+
+  handleSecond(event) {
+    const seconds = parseInt(event.target.value, 10);
+    this.setState({
+      ...this.state,
+      buriedTime: {
+        ...this.state.buriedTime,
+        seconds,
+      },
+    });
+  }
+
+  handleMinute(event) {
+    const minutes = parseInt(event.target.value, 10);
+    this.setState({
+      ...this.state,
+      buriedTime: {
+        ...this.state.buriedTime,
+        minutes,
+      },
+    });
+  }
+
+  handleHour(event) {
+    const hours = parseInt(event.target.value, 10);
+    this.setState({
+      ...this.state,
+      buriedTime: {
+        ...this.state.buriedTime,
+        hours,
+      },
     });
   }
 
@@ -28,27 +66,40 @@ class App extends React.Component {
       },
       body: JSON.stringify({
         message: this.state.message,
+        buriedTime: this.state.buriedTime,
       }),
     });
   }
 
+  componentDidMount() {
+    setInterval(() => {
+      console.log('setinterval');
+      fetch('/check')
+        .then((response) => response.json())
+        .then((message) => {
+          alert(message);
+        })
+        .catch((err) => {});
+    }, 5000);
+  }
+
   render() {
     return (
-      <div>
-        <form id="inputfields">
-          <label>Text:</label>
-          <br />
-          <textarea
-            name="message"
-            id="message"
-            value={this.state.message}
-            onChange={this.handleMessage}
-          ></textarea>
-          <br />
-          <label>Seconds:</label>
-          <input type="number" max="60" min="0" step="30"></input>
-          <button onClick={this.sendMessage}>ENTER</button>
-        </form>
+      <div id="app">
+        <label>Text:</label>
+        <br />
+        <MessageInput
+          message={this.state.message}
+          handleMessage={this.handleMessage}
+        />
+        <br />
+        <TimeInput
+          handleSecond={this.handleSecond}
+          handleMinute={this.handleMinute}
+          handleHour={this.handleHour}
+        />
+        <br />
+        <button onClick={this.sendMessage}>ENTER</button>
       </div>
     );
   }
